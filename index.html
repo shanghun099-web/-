@@ -355,8 +355,9 @@ async function callAI(prompt){
     body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})
   });
   const d=await r.json();
-  if(d.error)throw new Error(d.error.message);
-  return d.content?.[0]?.text??"잠시 후 다시 시도해 주세요.";
+  if(d.error) throw new Error("오류: "+d.error.type+" — "+d.error.message);
+  if(!d.content) throw new Error("응답 없음 (status "+r.status+")");
+  return d.content[0].text;
 }
 
 function parseQuote(raw){
@@ -396,7 +397,7 @@ async function loadQuote(){
         ${d.source?`<div class="quote-author"><div class="quote-author-line"></div><div class="quote-author-name">${esc(d.source)}</div></div>`:""}
       </div>
       ${d.apply?`<div class="apply-card"><div class="apply-eyebrow">오늘의 실천</div><div class="apply-body">${esc(d.apply)}</div></div>`:""}`;
-  }catch(e){el.innerHTML=errMsg(e.message?.includes("auth")?"API 키를 확인해 주세요":"불러오지 못했어요. 다시 시도해 주세요.")}
+  }catch(e){el.innerHTML=errMsg("❌ "+e.message)}
   btn.disabled=false;
 }
 
@@ -445,7 +446,7 @@ async function loadBible(){
           ${d.apply?`<div class="bible-row apply-row"><div class="bible-row-tag">오늘의 적용</div><div class="bible-row-body">${esc(d.apply)}</div></div>`:""}
         </div>
       </div>`;
-  }catch(e){el.innerHTML=errMsg(e.message?.includes("auth")?"API 키를 확인해 주세요":"불러오지 못했어요. 다시 시도해 주세요.")}
+  }catch(e){el.innerHTML=errMsg("❌ "+e.message)}
   btn.disabled=false;
 }
 
